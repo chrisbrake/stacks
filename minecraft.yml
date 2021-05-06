@@ -1,0 +1,42 @@
+version: "3"
+
+services:
+  minecraft:
+    image: itzg/minecraft-server
+    container_name: minecraft
+    environment:
+      EULA: "TRUE"
+      VERSION: "1.16.5"
+      GAMEMODE: survival
+      DIFFICULTY: normal
+      OPS: "AaronMac,cignature"
+      OVERRIDE_OPS: "TRUE"
+    volumes:
+      - minecraft:/data:rw
+    ports:
+      - 25565:25565
+    restart: unless-stopped
+
+  overviewer:
+    image: mide/minecraft-overviewer
+    container_name: overviewer
+    environment:
+      MINECRAFT_VERSION: "1.16.5"
+      ADDITIONAL_ARGS: "--processes 1"
+    volumes:
+      - minecraft:/home/minecraft/server/:ro
+      - overviewer:/home/minecraft/render/:rw
+    restart: on-failure
+
+  http:
+    image: httpd:alpine
+    container_name: http
+    volumes:
+      - overviewer:/usr/local/apache2/htdocs/:ro
+    ports:
+      - 8080:80
+    restart: unless-stopped
+
+volumes:
+  minecraft:
+  overviewer:
